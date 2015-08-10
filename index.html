@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Geekettes @ tCommons</title>
+
+    <!-- Custom Font Icons -->
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,700|Nixie+One|Glegoo|Bubblegum+Sans|Crafty+Girls|Cabin|Sue+Ellen+Francisco|Codystar|Fredericka+the+Great|Poiret+One|Cabin+Sketch|Cherry+Cream+Soda|Short+Stack|Irish+Grover|Quicksand|Josefin+Sans|Lobster|Life+Savers|Rokkitt|Finger+Paint|Source+Code+Pro|Graduate|Monoton|Open+Sans|Raleway|Indie+Flower|Pacifico|Orbitron|Passion+One|Special+Elite|Rancho|Black+Ops+One|Allerta+Stencil|Love+Ya+Like+A+Sister|Press+Start+2P|VT323|Anonymous+Pro|Sancreek|Raleway+Dots|Share+Tech+Mono|Gorditas' rel='stylesheet' type='text/css'>
+
+    <!-- Font Awesome Icon Library -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+   
+    <!-- Bootstrap 3 css styles  -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Scrolling Nav Styles --> 
+    <link href="css/scrolling-nav.css" rel="stylesheet" type="text/css">
+
+    <!-- Uncomment to load optional "Paper" theme for Bootstrap" -->
+    <!--<link href="https://bootswatch.com/paper/bootstrap.min.css" rel="stylesheet" type="text/css">-->
+
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="css/animate.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/geekettes.css">
+
+    <!-- Wow.js JavaScript -->
+    <script src="js/wow.min.js"></script>
+    <script>
+        new WOW().init();
+    </script>
+
+    <!-- JQuery JavaScript --> 
+    <script src="js/jquery-1.10.2.js"></script>
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <script src="js/jquery.easing.min.js"></script>
+    <script src="js/scrolling-nav.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+            /* Array to store Instagram posts after user is authenticated */
+            var posts = [];
+
+            /* Array to store GitHub profile from GitHub API */
+            var github = [];
+
+            /* Array to store repo information */
+            var repos = [];
+
+            /* Empty html container that will display user photos */
+            var imageHolder = $("#instafeed");
+
+            /* Empty html contianer to hold about me section */
+            var aboutMe = $("#aboutMe");
+
+            /* Empty html container to hold GitHub profile info from GitHub api */
+            var github = $("#github");
+
+            // This is your Instagram user id. Below is an example.
+            // var userid = "2068638377";
+            var userid = "2119528248";
+            
+            /* Variable that will grab the auth token from the url once the user has authenticated themselves through Instagram */
+            var myToken = window.location.hash.split("=");
+            myToken = myToken[1];
+
+            //This is the Client ID from the Instagram API below is an example.
+            // var client_id = "4948ecf94926486096fa105c5b78f9ff";
+            var client_id ="ff24a0bd9670479aab8e81d91f2c7011";
+
+            //This is your Github Username below is an example
+            // var github_name = "northdacoder";
+            var github_name = "mgott";
+           
+            // This function will fire after a successful Ajax call to the Instagram api & will pass 8 posts through the html template to create the photo grid
+            function createPhotoGrid (data) {
+                console.log(data);
+                var data = data.data; 
+                var myposts = []
+                for (var i = 0; i < 8; i++) {
+                    var image = data[i].images.standard_resolution.url;
+                    var imagegridHtml = 
+                                '<div class="col-sm-3 post wow bounceInLeft">' + 
+                                  '<div class="overlay"></div>' +
+                                  '<p class="lead username">' + data[i].user.username + '</p>' +  
+                                  '<img src="' + image + '" class="img-responsive post-image" style="width: 100%; height: auto;"/>' +
+                                '</div>';
+                    imageHolder.append(imagegridHtml);
+                    imageHolder.append(data[i]);  
+                }
+            }
+
+            aboutMe.append('<div class="col-sm-6 col-sm-offset-3" id="welcome-default"><h1 class="text-center">Welcome to geeking out with the Geeketttes! Please <a href="https://instagram.com/oauth/authorize/?client_id=' + client_id + '&redirect_uri=http://' + github_name +'.github.io/geekup-with-geekettes/&response_type=token" class="btn btn-primary btn-sm" id="insta-login"><i class="fa fa-instagram"></i> login</a> with Instagram to get started</h1></div>');
+
+            function createProfile (data) {
+                var data = data.data;
+                console.log(data);
+                var aboutmeHtml = 
+                        '<h1 class="text-center">About Me</h1><br>' +
+                        '<div class="col-sm-6 col-sm-offset-3">' +
+                            '<center><img class="img-responsive img-rounded" src="' + data.profile_picture + '"></center>' +
+                            '<h3 class="text-center" id="fullname">' + data.full_name + '</h3>' +
+                            '<h3 class="text-center" id="username"><i class="fa fa-instagram"></i> ' + data.username + '</h3>' +
+                            '<p class="lead text-center">' + data.bio + '</p>' +
+                        '</div>';
+
+                aboutMe.html(aboutmeHtml);
+            }
+
+            function githubHtml (data) {
+                var data = data.data;
+                console.log(data);
+                var date = data.created_at;
+                date = date.split("-");
+                date = date[0];
+                var githubHtml = 
+                        '<div class="col-sm-6 col-sm-offset-3" id="github-profile">' +
+                            '<img src="' + data.avatar_url + '" class="img-responsive img-circle" id="github-avatar">' +
+                            '<h1 class="text-center"><i class="fa fa-github"></i> ' + data.login + '</h1><br>' +
+                            '<h2 class="text-left">Current gig: <br><span class="answer">' + data.company + '</span></h2>' +
+                            '<h2 class="text-left">Hireable:<br> <span class="answer">' + data.hireable + '</span></h2>' +
+                            '<h2 class="text-left">Location:<br> <span class="answer"><i class="fa fa-map-marker"></i> ' + data.location + '</span></h2>' +
+                            '<a href="' + data.html_url + '"><h2 class="text-left"><i class="fa fa-github"></i> GitHub</h2></a>' +
+                            '<a href="' + data.repos_url + '"><h2 class="text-left">Repos: <span class="answer">' + data.public_repos + '</span></h2></a>' +
+                            '<a href="' + data.followers + '"><h2 class="text-left">Followers: <span class="answer">' + data.followers + '</span></h2></a>' +
+                            '<a href="' + data.following + '"><h2 class="text-left">Following: <span class="answer">' + data.following + '</span></h2></a>' +
+                            '<h2 class="text-left" id="joined-github">Passionately contributing code since ' + date + '</h2>' +
+                         '</div>';
+
+                $("#github").append(githubHtml);
+                $("#github").append(reposHtml);
+            }
+
+            function getData () {
+                //Add Ajax calls here
+            }  
+              
+            getData();
+
+            var instagramLogin = $("#insta-login");
+            var instagramLogout = $("#insta-logout");
+
+            if (myToken != undefined) {
+                instagramLogin.hide();
+                instagramLogout.show();
+            } else {
+                instagramLogout.hide();
+                instagramLogin.show();
+            }
+
+        });
+    </script>
+
+</head>
+
+<!-- The #page-top ID is part of the scrolling feature - the data-spy and data-target are part of the built-in Bootstrap scrollspy function -->
+<body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <li class="dropdown" id="logo-dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="nav-logo"><i class="fa fa-github"></i> Twin Cities Geekettes</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Events</a></li>
+                        <li><a href="#">Volunteer</a></li>
+                        <li><a href="#">Join us!</a></li>
+                    </ul>
+                </li>
+            </div>
+
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right" id="nav-right-list">
+                    <li id="insta-logout"><a href="https://instagram.com/accounts/logout/"><i class="fa fa-sign-out"></i> Logout</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row" style="margin-top: 95px;"></div>
+            
+        <!-- Empty row to hold our about me section -->
+        <div class="row wow bouncInUp" id="aboutMe"></div>
+        
+        <!-- Empty row to hold our GitHub profile -->
+        <div class="row" id="github"></div>
+    
+        <!-- Empty row that will hold our instagram photos -->
+        <div class="row wow bounceInLeft" style="margin-top: 0px;" id="instafeed"></div>
+    </div>
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
